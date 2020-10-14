@@ -41,6 +41,7 @@ namespace PDR.PatientBooking.Service.DoctorServices.Validation
             if (string.IsNullOrEmpty(request.Email))
                 errors.Add("Email must be populated");
 
+
             if (errors.Any())
             {
                 result.PassedValidation = false;

@@ -9,20 +9,22 @@ using System.Text;
 
 namespace PDR.PatientBooking.Service.BookingService
 {
-    public class BookingService:IBookingService
+    public class BookingService : IBookingService
     {
         private readonly PatientBookingContext _context;
-        private readonly IAddBookingRequestValidator _validator;
+        private readonly IAddBookingRequestValidator _addbookingvalidator;
+        private readonly ICancelBookingRequestValidator _cancelbookingvalidator;
 
-        public BookingService(PatientBookingContext context, IAddBookingRequestValidator validator)
+        public BookingService(PatientBookingContext context, IAddBookingRequestValidator addvalidator, ICancelBookingRequestValidator cancelvalidator)
         {
             _context = context;
-            _validator = validator;
+            _addbookingvalidator = addvalidator;
+            _cancelbookingvalidator = cancelvalidator;
         }
 
         public void AddBooking(AddBookingRequest request)
         {
-            var validationResult = _validator.ValidateRequest(request);
+            var validationResult = _addbookingvalidator.ValidateRequest(request);
 
             if (!validationResult.PassedValidation)
             {
@@ -38,7 +40,7 @@ namespace PDR.PatientBooking.Service.BookingService
             var bookingDoctor = _context.Doctor.FirstOrDefault(x => x.Id == request.DoctorId);
             var bookingSurgeryType = _context.Patient.FirstOrDefault(x => x.Id == bookingPatientId).Clinic.SurgeryType;
 
-             _context.Order.Add(new Order
+            _context.Order.Add(new Order
             {
                 Id = bookingId,
                 StartTime = bookingStartTime,
@@ -47,13 +49,27 @@ namespace PDR.PatientBooking.Service.BookingService
                 DoctorId = bookingDoctorId,
                 Patient = bookingPatient,
                 Doctor = bookingDoctor,
-                SurgeryType = (int)bookingSurgeryType
+                SurgeryType = (int)bookingSurgeryType,
+                Status = OrderStatus.Unserved
             });
 
             _context.SaveChanges();
         }
 
 
+        public void CancelBooking(CancelBookingRequest request)
+        {
+            var validationResult = _cancelbookingvalidator.ValidateRequest(request);
 
+            if (!validationResult.PassedValidation)
+            {
+                throw new ArgumentException(validationResult.Errors.First());
+            }
+
+            var booking = _context.Order.Find(request.BookingId);
+            booking.Status = OrderStatus.Canceled;
+            _context.SaveChanges();
+
+        }
     }
 }

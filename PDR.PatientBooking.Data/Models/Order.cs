@@ -8,9 +8,17 @@ namespace PDR.PatientBooking.Data.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int SurgeryType { get; set; }
+        public OrderStatus Status { get; set; }
         public virtual long PatientId { get; set; }
         public virtual long DoctorId { get; set; }
         public virtual Patient Patient { get; set; }
         public virtual Doctor Doctor { get; set; }
+    }
+
+    public enum OrderStatus
+    {
+        Unserved,
+        Canceled,
+        Served
     }
 }

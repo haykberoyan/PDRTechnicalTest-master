@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using PDR.PatientBooking.Data;
+using PDR.PatientBooking.Service.BookingService;
+using PDR.PatientBooking.Service.BookingService.Validation;
 using PDR.PatientBooking.Service.IoC;
 
 namespace PDR.PatientBookingApi
@@ -27,13 +29,16 @@ namespace PDR.PatientBookingApi
                     .UseInMemoryDatabase(databaseName: "PatientBooking")
                     .UseLazyLoadingProxies()
             );
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PatientBookingApi", Version = "v1" });
             });
 
             services.RegisterPatientBookingServices();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<ICancelBookingRequestValidator, CancelBookingRequestValidator>();
+            services.AddScoped<IAddBookingRequestValidator, AddBookingRequestValidator>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

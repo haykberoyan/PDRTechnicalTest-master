@@ -27,20 +27,20 @@ namespace PDR.PatientBookingApi.Controllers
         {
             var bockings = _context.Order.OrderBy(x => x.StartTime).ToList();
 
-            if (bockings.Where(x => x.Patient.Id == identificationNumber).Count() == 0)
+            if (bockings.Where(x => x.Patient.Id == identificationNumber && x.Status ==OrderStatus.Unserved).Count() == 0)
             {
                 return StatusCode(502);
             }
             else
             {
-                var bookings2 = bockings.Where(x => x.PatientId == identificationNumber);
+                var bookings2 = bockings.Where(x => x.PatientId == identificationNumber && x.Status == OrderStatus.Unserved);
                 if (bookings2.Where(x => x.StartTime > DateTime.Now).Count() == 0)
                 {
                     return StatusCode(502);
                 }
                 else
                 {
-                    var bookings3 = bookings2.Where(x => x.StartTime > DateTime.Now);
+                    var bookings3 = bookings2.Where(x => x.StartTime > DateTime.Now && x.Status == OrderStatus.Unserved);
                     return Ok(new
                     {
                         bookings3.First().Id,
@@ -69,7 +69,23 @@ namespace PDR.PatientBookingApi.Controllers
                 return StatusCode(500, ex);
             }
         }
-
+        [HttpPut()]
+        public IActionResult CancelBooking(CancelBookingRequest request)
+        {
+            try
+            {
+                _bookingService.CancelBooking(request);
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+        }
 
         private static MyOrderResult UpdateLatestBooking(List<Order> bookings2, int i)
         {

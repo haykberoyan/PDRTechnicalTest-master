@@ -9,7 +9,7 @@ using System.Text;
 
 namespace PDR.PatientBooking.Service.BookingService.Validation
 {
-    public class AddBookingRequestValidator
+    public class AddBookingRequestValidator : IAddBookingRequestValidator
     {
 
         private readonly PatientBookingContext _context;
