@@ -3,6 +3,7 @@ using PDR.PatientBooking.Service.PatientServices.Requests;
 using PDR.PatientBooking.Service.Validation;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PDR.PatientBooking.Service.PatientServices.Validation
 {
@@ -19,7 +20,7 @@ namespace PDR.PatientBooking.Service.PatientServices.Validation
         {
             var result = new PdrValidationResult(true);
 
-            if (MissingRequiredFields(request, ref result))
+            if (MissingOrInvalidFields(request, ref result))
                 return result;
 
             if (PatientAlreadyInDb(request, ref result))
@@ -31,7 +32,15 @@ namespace PDR.PatientBooking.Service.PatientServices.Validation
             return result;
         }
 
-        private bool MissingRequiredFields(AddPatientRequest request, ref PdrValidationResult result)
+        public static bool InvalidEmail(string email)
+        {
+            string pattern = @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z";
+            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            if (email == null || !regex.IsMatch(email))
+                return true;
+            return false;
+        }
+        private bool MissingOrInvalidFields(AddPatientRequest request, ref PdrValidationResult result)
         {
             var errors = new List<string>();
 
@@ -43,6 +52,9 @@ namespace PDR.PatientBooking.Service.PatientServices.Validation
 
             if (string.IsNullOrEmpty(request.Email))
                 errors.Add("Email must be populated");
+
+            if (InvalidEmail(request.Email))
+                errors.Add("Email must be a valid email address");
 
             if (errors.Any())
             {

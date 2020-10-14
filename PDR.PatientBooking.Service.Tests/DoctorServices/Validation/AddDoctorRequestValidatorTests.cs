@@ -125,10 +125,10 @@ namespace PDR.PatientBooking.Service.Tests.DoctorServices.Validation
             res.Errors.Should().Contain("Email must be a valid email address");
         }
 
+        [TestCase("user@1.net")]
         [TestCase("user@domain.com")]
         [TestCase("user@domain-domain.com")]
         [TestCase("user@domain.net")]
-        [TestCase("user@1.net")]
         [TestCase("user@domain.co.uk")]
         [TestCase("user.name@domain.com")]
         [TestCase("user.name@domain-domain.com")]
